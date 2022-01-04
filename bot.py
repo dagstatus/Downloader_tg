@@ -5,6 +5,7 @@ from aiogram.types import ParseMode
 import base
 import os
 import config
+import stats
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,20 +15,20 @@ dp = Dispatcher(bot)
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
-    await message.reply('Привет!\nИспользуй /help, '
-                        'чтобы узнать список доступных команд!')
+    await message.reply('Привет!\nДанный бот умеет скачить видео /help, '
+                        'с Youtube и instagram!')
 
 
-@dp.message_handler(commands=['stats'])
+@dp.message_handler(commands=['numb'])
 async def process_start_command(message: types.Message):
-    await message.reply('Number of users')
+    dict_stats = stats.read_stats()
+    await message.reply(f'Count of downloads - {str(dict_stats)}')
 
 
 @dp.message_handler(commands=['help'])
 async def process_help_command(message: types.Message):
-    msg = (('Я могу ответить на следующие команды:'),
-           '/voice', '/photo', '/group', '/note', '/file, /testpre')
-    await message.reply(msg, parse_mode=ParseMode.MARKDOWN)
+    msg = 'Просто вставьте ссылку'
+    await message.reply(msg)
 
 
 @dp.message_handler()

@@ -5,6 +5,8 @@ import re
 import asyncio
 import logging
 
+import stats
+
 logging.basicConfig(filename='app.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 path_dwld = 'temp'
 
@@ -12,7 +14,7 @@ path_dwld = 'temp'
 async def dwld(url, user_id):
     if re.search('youtu', url):
         try:
-            y_dwloader = YoutubeDL({'outtmpl': f'{path_dwld}/{user_id}.%(ext)s', "format": "mp4[height=480]",  'ignoreerrors': False})
+            y_dwloader = YoutubeDL({'outtmpl': f'{path_dwld}/{user_id}.%(ext)s', "format": "mp4[height=480]", 'ignoreerrors': False})
             with y_dwloader:
                 result = y_dwloader.extract_info(
                     url,
@@ -20,14 +22,26 @@ async def dwld(url, user_id):
                 )
             if result.get('duration') < 600:
                 y_dwloader.download([url])
-            return 'Благодарим за использование нашего бота'
+                stats.add_stat(yout=1)
+                return 'Благодарим за использование нашего бота'
+            else:
+                return 'Видео слишком длинное'
         except Exception as exept_full:
-            return 'Произошла ошибка скачивания'
             logging.WARNING(str(exept_full))
+            stats.add_stat(err=1)
+            return 'Произошла ошибка скачивания'
 
     else:
-        y_dwloader = YoutubeDL({'outtmpl': f'{path_dwld}/{user_id}.%(ext)s'})
-        y_dwloader.download([url])
+        try:
+            y_dwloader = YoutubeDL({'outtmpl': f'{path_dwld}/{user_id}.%(ext)s', 'ignoreerrors': False})
+            y_dwloader.download([url])
+            stats.add_stat(inst=1)
+            return 'Благодарим за использование нашего бота'
+        except Exception as exept_full:
+            logging.WARNING(str(exept_full))
+            stats.add_stat(err=1)
+            return 'Произошла ошибка скачивания'
+
 
 async def delete_local_file(user_id):
     print('start del')
